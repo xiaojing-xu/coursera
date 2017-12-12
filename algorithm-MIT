@@ -27,6 +27,30 @@ An: -19
 
 ### WEEK 2
 # Set1
+Q1: Which of the following statements cannot be true, given the current state of knowledge?
+An: Some NP-complete problems are polynomial-time solvable, and some NP-complete problems are not polynomial-time solvable.
+
+Q2: Let TSP1 denote the following problem: given a TSP instance in which all edge costs are positive integers, compute the value of an optimal TSP tour. Let TSP2 denote: given a TSP instance in which all edge costs are positive integers, and a positive integer T, decide whether or not there is a TSP tour with total length at most T. Let HAM1 denote: given an undirected graph, either return the edges of a Hamiltonian cycle (a cycle that visits every vertex exactly once), or correctly decide that the graph has no such cycle. Let HAM2 denote: given an undirected graph, decide whether or not the graph contains at least one Hamiltonian cycle.
+An: If TSP2 is polynomial-time solvable, then so is TSP1. If HAM2 is polynomial-time solvable, then so is HAM1.
+
+Q3: Assume that P≠NP. Consider undirected graphs with nonnegative edge lengths. Which of the following problems can be solved in polynomial time?
+Hint: The Hamiltonian path problem is: given an undirected graph with n vertices, decide whether or not there is a (cycle-free) path with n−1 edges that visits every vertex exactly once. You can use the fact that the Hamiltonian path problem is NP-complete. There are relatively simple reductions from the Hamiltonian path problem to 3 of the 4 problems below.
+An: For a given source s and destination t, compute the length of a shortest s-t path that has exactly n−1 edges (or +∞, if no such path exists). The path is allowed to contain cycles.
+
+Q4: Choose the strongest true statement.
+An: All three of the other assertions are true.
+
+Q5: Which of the following statements is true?
+An: Consider a TSP instance in which every edge cost is the Euclidean distance between two points in the place (just like in Programming Assignment #5). Deleting a vertex and all of its incident edges cannot increase the cost of the optimal (i.e., minimum sum of edge lengths) tour.
+
+# Set2
+Q: In this assignment you will implement one or more algorithms for the traveling salesman problem, such as the dynamic programming algorithm covered in the video lectures. Here is a data file describing a TSP instance.
+An: 26442
+
+### WEEK 3
+# Set1 
+
+
 
 
 
