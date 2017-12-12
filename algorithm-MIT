@@ -61,6 +61,10 @@ Q2: Consider the same makespan-minimization job scheduling problem studied in th
 Consider the following statement: for every such job scheduling instance, the greedy algorithm (with this sorting preprocessing step) computes a job assignment with makespan at most c times that of an optimal (minimum-makespan) job assignment. Which of the following is the smallest choice of the constant c for which this statement is true?
 An: 3/2
 
+# Set2
+An: 1203406
+
+### WEEK4
 
 
 
