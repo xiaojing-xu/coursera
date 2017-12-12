@@ -49,8 +49,17 @@ An: 26442
 
 ### WEEK 3
 # Set1 
+Q1: n the set cover problem, you are given m sets S1,...,Sm, each a subset of a common set U with size |U|=n. The goal is to select as few of these sets as possible, subject to the constraint that the union of the chosen sets is all of U. (You can assume that ∪mi=1Si=U.) For example, if the given sets are {1,2}, {2,3}, and {3,4}, then the optimal solution consists of the sets {1,2} and {3,4}.
+Here is a natural iterative greedy algorithm. First, initialize C=∅, where C denotes the sets chosen so far. The main loop is: as long as the union ∪S∈CS of the sets chosen so far is not the entire set U:
+Let Si be a set that includes the maximum-possible number of elements not in previously-chosen sets (i.e., that maximizes |Si−∪S∈CS|).
+Add Si to C.
+Consider the following statement: for every instance of the set cover problem (with |U|=n), this greedy algorithm returns a set cover with size at most f(n) times that of an optimal (minimum-size) set cover. Which of the following is the smallest choice of the function f(n) for which this statement is true?
+[Hint: what's the mininum-possible progress that the greedy algorithm can make in each iteration, as a function of the size of an optimal set cover and of the number of elements that have not yet been covered?]
+An: O(logn)
 
-
+Q2: Consider the same makespan-minimization job scheduling problem studied in the previous problem. Now suppose that, prior to running the greedy algorithm in the previous problem, we first sort the jobs from biggest to smallest. For example, in the four-job instance discussed in the previous problem, the jobs would be considered in the order 8,7,6,5, and the greedy algorithm would then produce an optimal schedule, with makespan 13.
+Consider the following statement: for every such job scheduling instance, the greedy algorithm (with this sorting preprocessing step) computes a job assignment with makespan at most c times that of an optimal (minimum-makespan) job assignment. Which of the following is the smallest choice of the constant c for which this statement is true?
+An: 3/2
 
 
 
