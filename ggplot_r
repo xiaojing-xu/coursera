@@ -1,0 +1,247 @@
+setwd('/Users/xiaojingxu/Downloads/csv')
+library(data.table)
+df1 = fread('target_file.csv')
+dim(df1)
+head(df1)
+
+barfill <- "white"
+barlines <- "black"
+library(ggplot2)
+
+annotations <- data.frame(
+  xpos = c(2.4, 3.65, 5.6),
+  ypos = c(330,430, 330),
+  annotateText = c("Low risk group: <20%",'Middle risk group',"High risk group: >20%"),
+  hjustvar = c(0,0,1) ,
+  vjustvar = c(1,1,1))
+
+
+ggplot(df1, aes(PGS)) + 
+  geom_histogram(colour = barlines, fill = barfill, bins=18) + 
+  theme_bw()   +
+  geom_vline(xintercept=quantile(df1$PGS, c(0.20, .40,0.6,0.8)) [1], linetype = "dashed", colour = "green") +
+  geom_vline(xintercept=quantile(df1$PGS, c(0.20, .40,0.6,0.8)) [4], linetype = "dashed", colour = "red") +
+  ggtitle("1a. Distribution of genetic risk") +
+  ylab('Frequency') +
+  xlab('') +
+  geom_text(data = annotations, aes(x=xpos,y=ypos,hjust=hjustvar,
+                                    vjust=vjustvar,label=annotateText))
+
+############################################################################
+X = as.data.frame.table(table(df1$health_life, df1$sex) / colSums(table(df1$health_life, df1$sex)))
+y = data.table(table(df1$health_life, df1$sex))
+y = y[, `sum`:=sum(N), by = V2]
+y$Freq = y$N / y$sum
+
+ggplot(y,aes(x = V2,y = Freq)) + 
+  geom_bar(aes(fill = V1),stat = "identity",position = "dodge", colour = barlines) +
+  theme_bw() + 
+  ggtitle('1b. Distribution of lifestyle') +
+  ylab('Percentage') +
+  xlab('')+
+  scale_x_discrete(labels=c("Female","Male")) + 
+  scale_fill_discrete(labels=rev(c("Favorable","Intermediate","Unfavorable")), name="Lifestyle groups")
+############################################################################
+
+##tiff("Figure1c.tiff", width = 4, height = 4, units = 'in', res = 300)
+Y  = data.table(table(df1$health_life, df1$three))
+Y[, Sum1:=sum(N), by=list(V1, V1)]
+Y[, Ratio1:= N/Sum1]
+Y$Ratio1 = round(Y$Ratio1, digits = 3)
+Y[, Sum2:=sum(N), by=list(V2, V2)]
+Y[, Ratio2:= N/Sum2]
+Y$Ratio2 = round(Y$Ratio2, digits = 3)
+
+ggplot(data = Y, aes(x=V1, y=V2)) + 
+  theme_bw() +
+  #geom_tile() +
+  geom_text(aes(V2, V1,  label=sprintf("%0.3f", round(Ratio1, digits = 3))), color = "black",      size = 7, vjust = -0.5) +
+  geom_text(aes(V2, V1,  label=sprintf("%0.3f", round(Ratio2, digits = 3))), color = "darkgray",   size = 7, vjust = 1.5 ) + 
+  ggtitle('Figure S1. Frequencies of lifestyle groups and genetic risk groups (n=2708)') +
+  ylab('Lifestyle groups') +
+  xlab("Genetic risk groups") + 
+  scale_x_discrete(labels=c("Low genetic risk group","Midde genetic risk group","High genetic risk group")) +
+  scale_y_discrete(labels=c("Unfavorable","Intermediate","Favorable")) +
+  theme(axis.text.y  = element_text(angle = 90, hjust = 0.5))
+## dev.off()
+
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+
+blp = data.table(read.csv('blp.csv'))
+blp = blp[order(blp$variable, +blp$value), ][, -c("X"), with=FALSE]
+
+library(ggplot2)
+library(scales)
+
+
+ggplot(data=blp, aes(x=V3, y=value, fill=factor(variable))) +
+  geom_bar(position="dodge",stat="identity") + 
+  scale_colour_manual(values = rev(brewer.pal(2,"BuPu"))) +
+  coord_flip()  + 
+  theme_bw() + 
+  scale_x_discrete(
+    limits= blp$V3[1:58] ) + 
+  ggtitle("Figure2. Relationship between genetic risks, lifestyle groups and clinical measurements") + 
+  xlab("")  + 
+  ylab("-log10(p-value)") + 
+  theme(legend.position="left") + 
+  scale_fill_discrete(labels=rev(c("Genetics", "Lifestyle")), name="") + 
+  theme(plot.caption=element_text(hjust=0), legend.justification=c(1,0), legend.position=c(1,0), axis.title=element_text(size=7)) +
+  geom_hline(yintercept=-log10(9.79e-04), linetype = "dashed", colour = "black") + 
+  geom_hline(yintercept=-log10(0.05), linetype = "dashed", colour = "gray")
+
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+library(ggrepel)
+df = fread("proteins.csv")
+df$logpx = -log10(df$p.x)
+df$logpy = -log10(df$p.y)
+
+ggplot(df, aes(logpx, logpy, label = uniprot)) + 
+  theme_bw()+
+  geom_point(color="black")+ 
+  geom_point(data=df[df$p.x<0.05,],color="green") +
+  geom_point(data=df[df$fdr.x<0.05,],color="darkgreen") +
+  geom_point(data=df[df$p.y<0.05,],color="red") +
+  geom_point(data=df[df$fdr.y<0.05,],color="darkred") +
+  geom_text_repel(data=df[fdr.y<0.05,], aes(logpx, logpy, label = uniprot)) + 
+  geom_text_repel(data=df[p.x<0.005,], aes(logpx, logpy, label = uniprot)) +
+  xlab("-log10(p-value) of genetic risks") +
+  ylab("-log10(p-value) of lifestyle groups") + 
+  ggtitle("Figure 3. Relationships with genetic risk, lifestyle and plasma proteomics")
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+df = fread("microbiome.csv")[,-c("V1"), with=TRUE]
+df$name = gsub("_musicc","",df$y)
+df$logp = -log10(df$p)
+df = df[y!='K07536_musicc']
+
+ggplot(df, aes(coef, logp, label = name)) + 
+  theme_bw()+
+  geom_point(color="black")+ 
+  geom_point(data=df[df$p<0.05,],color="lightblue") +
+  geom_point(data=df[df$fdr<0.05,],color="blue") +
+  geom_text_repel(data=df[fdr<0.05, ], aes(coef, logp, label = name)) + 
+  xlab("regression coefficient") +
+  ylab("-log10(p-value) of genetic risks * lifestyle groups") + 
+  ggtitle("Figure 4. Volcano plot of genetic*lifestyle interaction effect on gut microbiota ")
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+df = fread("self_phewas.csv")[,-c("V1"), with=TRUE]
+colnames(df)[8] = c("category")
+df$CHR  = c(rep(1:3, each = nrow(df)/3))
+df$BP   = rep(1:(nrow(df)/3), 3)
+df$logp = -log10(df$p)
+
+ggplot(df, aes(BP, logp), group=category) + 
+  theme_bw()+
+  geom_point(color="black") +
+  geom_point(data=df[df$fdr<0.05,], aes(color=factor(category)),  size=3.5) + 
+  geom_point(data=df[df$p<0.05,], aes(color=factor(category))) + 
+  geom_text_repel(data=df[p<0.05, ], aes(BP, logp, label=y)) +
+  ylab("-log10(p-value) of genetic risks, lifestyle groups, and interactions") + 
+  xlab("64 different self-reported health conditions") +
+  ggtitle("Figure 5. Manhattan plot of Phenotye wide association analysis (PheWAS)") 
+
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+z = fread("interaction_microbiome.csv")
+
+ggplot(z[y<20], aes(x=factor(g), y=y, color = factor(l, labels = c("Unfavorable", "Intermediate", "Favorable")))) +
+  geom_boxplot(outlier.size=-1) +    
+  ggtitle("Figure S2. Interaction of genetic risk*lifestyle group in gut microbiota K04110") + 
+  xlab("Genetic risk group from low, median to high") + 
+  ylab("Residual of gut microbiome K04110 abundance") + 
+  labs(color = "Lifestyle") + 
+  ylim(-0.8,0.5) + 
+  theme_bw()
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+
+
+
+df = fread('t_h_ratio.csv')
+
+ggplot(df[visit==1,], aes(x=factor(health_life), y=res, fill=factor(health_life))) +
+  geom_boxplot()+
+  theme_bw()+
+  xlab('Lifestyles groups')+
+  ylab("Triglyceride / HDL ratio") +
+  scale_x_discrete(labels=c("Unfavorable","Intermediate","Favorable"))+
+  scale_fill_discrete(labels=rev(c("Favorable","Intermediate","Unfavorable")), name="Lifestyle groups")+
+  ggtitle("3b. Triglyceride / HDL ratio by lifestyle groups (FDR<0.05)")
+
+ggplot(df[visit==1,], aes(x=factor(three), y=res, fill=factor(three))) +
+  geom_boxplot()+
+  theme_bw()+
+  xlab('Genetic risk groups')+
+  ylab("Plasma calcium") +
+  scale_x_discrete(labels=c("Low genetic risk group","Midde genetic risk group","High genetic risk group"))+
+  scale_fill_discrete(labels=c("Low risk","Midde risk","High risk"), name="Genetic risk groups")+
+  ggtitle("3a. Plasma calcium by genetic risk groups (FDR<0.05)")
+
+
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+dfl    = df[visit<=3 & !is.na(baseline_obese), lapply(.SD, mean, na.rm=TRUE), by=.(visit, baseline_obese), .SDcols='ldl_small' ]
+dfl$sd = df[visit<=3 & !is.na(baseline_obese), lapply(.SD, sd, na.rm=TRUE), by=.(visit, baseline_obese), .SDcols='ldl_small' ]$ldl_small
+
+
+# Change line types and point shapes
+ggplot(dfl, aes(x=visit, y=ldl_small, group=factor(baseline_obese), color=factor(baseline_obese))) +
+  geom_errorbar(size = 1, aes(ymin=ldl_small-sd, ymax=ldl_small+sd), width=.2, position=position_dodge(0.05))+
+  geom_line( size = 1, aes(linetype=factor(baseline_obese)))+
+  geom_point(size = 4,   aes(shape=factor(baseline_obese)))+
+  theme_bw() +
+  xlab('Blood draws') +
+  ylab('LDL small particle') +
+  scale_x_continuous(breaks=seq(1, 3, 1), labels=c('1st','2nd','3rd')) +
+  scale_fill_discrete(name='test') +
+  ggtitle("3c. Baseline obese * time effect on LDL small(FDR<0.05)")
+
+
+# Change line types and point shapes
+dfll    = df[visit<=3 & !is.na(baseline_obese), lapply(.SD, mean, na.rm=TRUE), by=.(visit, baseline_obese), .SDcols='dha' ]
+dfll$sd = df[visit<=3 & !is.na(baseline_obese), lapply(.SD, sd, na.rm=TRUE), by=.(visit, baseline_obese), .SDcols='dha' ]$dha
+
+
+ggplot(dfll, aes(x=visit, y=dha, group=factor(baseline_obese), color=factor(baseline_obese))) +
+  geom_errorbar(size = 1, aes(ymin=dha-sd, ymax=dha+sd), width=.2, position=position_dodge(0.05))+
+  geom_line( size = 1, aes(linetype=factor(baseline_obese)))+
+  geom_point(size = 4,   aes(shape=factor(baseline_obese)))+
+  theme_bw() +
+  xlab('Blood draws') +
+  ylab('DHA levels') +
+  scale_x_continuous(breaks=seq(1, 3, 1), labels=c('1st','2nd','3rd')) +
+  scale_fill_discrete(name='test') +
+  ggtitle("3d. Baseline obese * time effect on DHA (FDR<0.05)")
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+#####################################################################################
+
+
+
+
+
